@@ -76,10 +76,6 @@ A single-file, client-side web tool that converts .docx (Microsoft Word) files o
 5.  Edit if needed, then **Download** or **Copy** to clipboard.  
     
 
-## **📷 Screenshot**
-
-_(Optional: Add a screenshot of your tool here)_
-
 ## **🛠️ Built With**
 
 *   [Mammoth.js](https://github.com/mwilliamson/mammoth.js) — DOCX to HTML converter  
