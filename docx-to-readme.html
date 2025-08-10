@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>All-in-one DOCX → README.md Converter</title>
+  <meta name="description" content="Upload a .docx file and convert it to a GitHub-ready README.md (client-side, single file)">
+    <!-- Favicons -->
+  <link href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjKVqFVNkBnft8At0R1hPqXtq0MHhJ2MseuCZMqilvsz8YNclsi37lYmSwJf0PkzajbaTjt6e3nfHKHCKau31Nj_EdPKq2pKdeDx7R7pUNo6bEw81FKpFZ661vDjVaKIi1g04NaCPhLrWrVUbKlDWThIT41rGoJbHmU678phR41cJHUiV_-nrEbkPEQAlM/s16000/svgviewer-png-output.png" rel="icon" loading="lazy">
+  <link href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjKVqFVNkBnft8At0R1hPqXtq0MHhJ2MseuCZMqilvsz8YNclsi37lYmSwJf0PkzajbaTjt6e3nfHKHCKau31Nj_EdPKq2pKdeDx7R7pUNo6bEw81FKpFZ661vDjVaKIi1g04NaCPhLrWrVUbKlDWThIT41rGoJbHmU678phR41cJHUiV_-nrEbkPEQAlM/s16000/svgviewer-png-output.png" rel="apple-touch-icon" loading="lazy">
+
+  <style>
+    :root{--bg:#0f1724;--card:#0b1220;--muted:#9aa4b2;--accent:#7c3aed}
+    *{box-sizing:border-box;font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial}
+    body{margin:0;background:linear-gradient(180deg,#071027 0%,#071226 100%);color:#e6eef8;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:28px}
+    .app{width:100%;max-width:1100px}
+    header{display:flex;align-items:center;gap:16px;margin-bottom:18px}
+    header h1{font-size:20px;margin:0}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+    .card{background:var(--card);padding:16px;border-radius:12px;box-shadow:0 6px 30px rgba(2,6,23,0.6)}
+    .drop{height:160px;border:2px dashed rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;border-radius:10px;flex-direction:column;gap:8px}
+    input[type=file]{display:none}
+    .btn{display:inline-block;padding:8px 12px;border-radius:8px;background:var(--accent);color:white;text-decoration:none;cursor:pointer;border:none}
+    .muted{color:var(--muted);font-size:13px}
+    textarea{width:100%;height:420px;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:#071123;color:inherit;resize:vertical}
+    .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+    .preview{background:#01060c;padding:12px;border-radius:8px;height:420px;overflow:auto}
+    .row{display:flex;gap:8px}
+    footer{margin-top:12px;text-align:center;color:var(--muted);font-size:13px}
+    .small{font-size:13px}
+    .options{display:flex;gap:8px;align-items:center}
+    label.switch{display:inline-flex;align-items:center;gap:6px}
+    code{background:#08111a;padding:2px 6px;border-radius:6px}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 24 24'><rect rx='6' width='24' height='24' fill='%237c3aed'/><text x='50%' y='55%' font-size='12' text-anchor='middle' fill='white' font-family='Arial'>MD</text></svg>" alt="logo">
+      <div>
+        <h1>DOCX → README.md — All‑in‑one (client-side)</h1>
+        <div class="muted">Upload a <code>.docx</code> file (Word) or paste HTML/plain text and convert it to GitHub-ready Markdown. Images are embedded as base64.</div>
+      </div>
+    </header>
+
+    <main class="grid">
+      <section class="card">
+        <div class="toolbar">
+          <label class="btn" id="chooseBtn">Choose .docx file</label>
+          <input type="file" id="fileInput" accept=".docx,.doc">
+          <button class="btn" id="convertBtn">Convert</button>
+          <button class="btn" id="downloadBtn">Download README.md</button>
+          <div style="flex:1"></div>
+        </div>
+
+        <div class="drop" id="dropZone">
+          <div style="text-align:center">
+            <strong id="dropText">Drag & drop a .docx file here</strong>
+            <div class="small muted">or click "Choose .docx file"</div>
+          </div>
+        </div>
+
+        <div style="margin-top:12px;display:flex;gap:8px;align-items:center;justify-content:space-between">
+          <div class="small muted">Conversion options</div>
+          <div class="options">
+            <label class="switch small"><input type="checkbox" id="embedImages" checked> Embed images (base64)</label>
+            <label class="switch small"><input type="checkbox" id="preserveStyles"> Preserve simple bold/italic</label>
+          </div>
+        </div>
+
+        <div style="margin-top:12px">
+          <div class="small muted">Preview (Markdown output). Edit if you want before download.</div>
+          <textarea id="mdOut" placeholder="Converted markdown will appear here..."></textarea>
+        </div>
+      </section>
+
+      <aside class="card">
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
+          <div class="muted">Rendered preview</div>
+          <div style="flex:1"></div>
+          <button class="btn" id="copyBtn">Copy to clipboard</button>
+        </div>
+        <div class="preview" id="htmlPreview"><em class="muted">Converted README preview will appear here.</em></div>
+
+        <hr style="margin:12px 0;border:none;border-top:1px solid rgba(255,255,255,0.04)">
+        <div class="small muted">Or paste HTML / Plain text below and click <strong>Convert</strong>.</div>
+        <textarea id="rawInput" placeholder="Paste HTML or plain text here for conversion (optional)" style="height:120px;margin-top:8px"></textarea>
+
+        <div style="margin-top:8px;display:flex;gap:8px">
+          <button class="btn" id="convertRaw">Convert Pasted Content</button>
+          <button class="btn" id="clearBtn">Clear</button>
+        </div>
+      </aside>
+    </main>
+
+    <footer>
+      Single-file client-side tool. Supports <code>.docx</code> (Mammoth) and pasted HTML/plain text. Not all Word features (track changes, complex tables) are preserved. Images are embedded as base64 if enabled.
+    </footer>
+  </div>
+
+  <!-- Libraries (CDN) -->
+  <script src="https://unpkg.com/mammoth/mammoth.browser.min.js"></script>
+  <script src="https://unpkg.com/turndown/dist/turndown.js"></script>
+
+  <script>
+    // Elements
+    const fileInput = document.getElementById('fileInput');
+    const chooseBtn = document.getElementById('chooseBtn');
+    const dropZone = document.getElementById('dropZone');
+    const dropText = document.getElementById('dropText');
+    const convertBtn = document.getElementById('convertBtn');
+    const convertRaw = document.getElementById('convertRaw');
+    const mdOut = document.getElementById('mdOut');
+    const rawInput = document.getElementById('rawInput');
+    const htmlPreview = document.getElementById('htmlPreview');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const copyBtn = document.getElementById('copyBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const embedImages = document.getElementById('embedImages');
+
+    // wire choose
+    chooseBtn.addEventListener('click', ()=> fileInput.click());
+
+    // drag/drop
+    ;['dragenter','dragover'].forEach(e => dropZone.addEventListener(e, ev => {ev.preventDefault(); dropZone.style.borderColor = 'rgba(255,255,255,0.14)';}));
+    ;['dragleave','drop'].forEach(e => dropZone.addEventListener(e, ev => {ev.preventDefault(); dropZone.style.borderColor = ''; }));
+    dropZone.addEventListener('drop', async ev => {ev.preventDefault(); const f = ev.dataTransfer.files[0]; if (f) await handleFile(f);});
+
+    fileInput.addEventListener('change', async e => { const f = e.target.files[0]; if (f) await handleFile(f); });
+
+    async function handleFile(file){
+      dropText.textContent = `Loaded: ${file.name} — parsing...`;
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        // Mammoth options: convert images to data urls if embedImages checked
+        const options = {
+          convertImage: mammoth.images.inline(async function(element){
+            if (!embedImages.checked) return {src: ''};
+            const buffer = element.read();
+            const blob = new Blob([buffer], {type: element.contentType});
+            const dataUrl = await blobToDataURL(blob);
+            return {src: dataUrl};
+          })
+        };
+        const result = await mammoth.convertToHtml({arrayBuffer}, options);
+        const html = result.value; // generated HTML
+        // show warnings if any
+        if (result.messages && result.messages.length) console.warn('mammoth messages', result.messages);
+        await convertHtmlToMarkdown(html);
+        dropText.textContent = `Loaded: ${file.name}`;
+      } catch (err){
+        console.error(err);
+        dropText.textContent = `Error parsing file`;
+      }
+    }
+
+    async function blobToDataURL(blob){
+      return await new Promise((res,rej)=>{
+        const fr = new FileReader();
+        fr.onload = ()=> res(fr.result);
+        fr.onerror = rej;
+        fr.readAsDataURL(blob);
+      });
+    }
+
+// Convert HTML string to Markdown using Turndown
+async function convertHtmlToMarkdown(html){
+  // optional simple postprocessing to tidy up Word-specific stuff
+  const cleaned = tidyWordHtml(html);
+  const turndownService = new TurndownService({headingStyle:'atx',codeBlockStyle:'fenced'});
+
+  // ✅ Prevent escaping underscores in links
+  turndownService.escape = function (string) {
+    return string
+      .replace(/\\/g, '\\\\') // Keep backslash escaping
+      .replace(/`/g, '\\`')   // Escape backticks
+      .replace(/\*/g, '\\*')  // Escape asterisks
+      .replace(/~/g, '\\~')   // Escape tildes
+      .replace(/</g, '\\<');  // Escape angle brackets
+    // Note: underscore `_` is intentionally left alone
+  };
+
+  // preserve bold/italic if asked
+  if (document.getElementById('preserveStyles').checked){
+    turndownService.addRule('strike',{
+      filter: ['b','strong','i','em'],
+      replacement: function(content, node){
+        const tag = node.nodeName.toLowerCase();
+        if(tag==='b' || tag==='strong') return `**${content}**`;
+        if(tag==='i' || tag==='em') return `*${content}*`;
+        return content;
+      }
+    });
+  }
+
+  // Convert
+  const markdown = turndownService.turndown(cleaned);
+
+  // Put a front-matter like heading if none exists
+  let final = markdown.trim();
+  if(!/^#\s+/m.test(final)){
+    const titleMatch = cleaned.match(/<h1[^>]*>(.*?)<\/h1>/i);
+    const title = titleMatch ? stripTags(titleMatch[1]) : '';
+    if(title) final = `# ${title}\n\n` + final;
+  }
+
+  mdOut.value = final;
+  renderPreview(final);
+}
+
+
+    // simple HTML tidier for Word output
+    function tidyWordHtml(html){
+      // remove comments and mso tags
+      let s = html.replace(/<!--([\s\S]*?)-->/g,'');
+      s = s.replace(/<\/?(meta|style|xml|w:.*?|o:.*?|v:.*?|mso:.*?|link)[^>]*>/gi,'');
+      // convert microsoft non-breaking spaces
+      s = s.replace(/&nbsp;/g,' ');
+      // remove empty spans
+      s = s.replace(/<span[^>]*>\s*<\/span>/g,'');
+      return s;
+    }
+
+    function stripTags(html){ return html.replace(/<[^>]*>/g,'').replace(/\s+/g,' ').trim(); }
+
+    function renderPreview(markdown){
+      // minimal markdown -> HTML rendering for preview (not a full MD engine)
+      // Use a simple converter for headings, lists and code fences
+      let html = markdown
+        .replace(/^##### (.*$)/gim,'<h5>$1</h5>')
+        .replace(/^#### (.*$)/gim,'<h4>$1</h4>')
+        .replace(/^### (.*$)/gim,'<h3>$1</h3>')
+        .replace(/^## (.*$)/gim,'<h2>$1</h2>')
+        .replace(/^# (.*$)/gim,'<h1>$1</h1>')
+        .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g,'<em>$1</em>')
+        .replace(/```([\s\S]*?)```/g, function(m, code){return '<pre><code>'+escapeHtml(code)+'</code></pre>';})
+        .replace(/(^|\n)\s*\-\s+(.*)/g,'$1<li>$2</li>')
+        .replace(/(<li>.*<\/li>)/g,'<ul>$1</ul>');
+      // paragraphs
+      html = html.split('\n\n').map(p=> p.trim()).map(p=>{
+        if(/^<h|^<ul|^<pre/.test(p)) return p;
+        return '<p>'+p.replace(/\n/g,'<br>')+'</p>';
+      }).join('\n');
+      htmlPreview.innerHTML = html;
+    }
+
+    function escapeHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+    // Convert pasted raw content
+    convertRaw.addEventListener('click', async ()=>{
+      const txt = rawInput.value.trim();
+      if(!txt) return alert('Paste some HTML or text first.');
+      // detect if it looks like HTML
+      const isHtml = /<[^>]+>/.test(txt);
+      if(isHtml) await convertHtmlToMarkdown(txt);
+      else {
+        // treat as plain text (wrap in <p> blocks)
+        const lines = txt.split('\n').map(l=>'<p>'+escapeHtml(l)+'</p>').join('\n');
+        await convertHtmlToMarkdown(lines);
+      }
+    });
+
+    convertBtn.addEventListener('click', async ()=>{
+      // If there's raw input, prefer that
+      if(rawInput.value.trim()) return convertRaw.click();
+      // Else, if markdown already present do nothing
+      if(mdOut.value.trim()) return renderPreview(mdOut.value);
+      alert('Choose a .docx file or paste HTML/plain text first.');
+    });
+
+    // download
+    downloadBtn.addEventListener('click', ()=>{
+      const content = mdOut.value || '';
+      if(!content) return alert('Nothing to download. Convert a file first.');
+      const blob = new Blob([content],{type:'text/markdown;charset=utf-8'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'README.md'; document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+    });
+
+    // copy
+    copyBtn.addEventListener('click', async ()=>{
+      try{ await navigator.clipboard.writeText(mdOut.value); alert('Copied to clipboard'); }
+      catch(e){ alert('Unable to copy.'); }
+    });
+
+    clearBtn.addEventListener('click', ()=>{ rawInput.value=''; mdOut.value=''; htmlPreview.innerHTML='<em class="muted">Converted README preview will appear here.</em>'; dropText.textContent='Drag & drop a .docx file here';});
+
+    // helper: if user edits mdOut, update preview
+    let typing;
+    mdOut.addEventListener('input', ()=>{ clearTimeout(typing); typing=setTimeout(()=>renderPreview(mdOut.value),300); });
+
+  </script>
+</body>
+</html>
