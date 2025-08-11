@@ -87,4 +87,4 @@ A single-file, client-side web tool that converts .docx (Microsoft Word) files o
 
 ## **📄 License**
 
-This project is licensed under the MIT License — see the LICENSE file for details.
+This project is licensed under the MIT License — see the [LICENSE](https://github.com/afnan-nex/docx-to-readme/blob/main/LICENSE) file for details.
