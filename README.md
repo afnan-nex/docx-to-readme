@@ -1,5 +1,5 @@
 # **DOCX → README.md Converter**
-
+<a href="https://afnan-nex.github.io/docx-to-readme/docx-to-readme.html" target="_blank" rel="noopener noreferrer">Click Here to Open</a>
 A single-file, client-side web tool that converts .docx (Microsoft Word) files or pasted HTML/text into GitHub-ready Markdown (README.md) with live preview and optional image embedding.
 
 ## **✨ Features**
